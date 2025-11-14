@@ -1,0 +1,31 @@
+@font-face {
+  font-family: 'Inter';
+  src: url('./assets/fonts/Inter.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #2563eb, #60a5fa);
+}
+
+/* Для Chrome, Safari, Edge */
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Для Firefox */
+.no-spinner {
+  -moz-appearance: textfield;
+}
+
+svg {
+  outline: none;
+}

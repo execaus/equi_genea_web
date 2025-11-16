@@ -67,3 +67,16 @@
 .list-item-glass {
     @apply w-full bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-white/20 shadow-inner p-4 transition-all;
 }
+
+.checkbox-glass {
+    @apply appearance-none w-9 h-9 rounded-lg bg-white/10 border border-white/30 backdrop-blur-lg cursor-pointer relative transition-all;
+}
+
+.checkbox-glass:checked {
+    @apply bg-white/30 border-white/50;
+}
+
+.checkbox-glass:checked::after {
+    content: '';
+    @apply absolute top-1.5 left-3 w-3 h-4 border-r-2 border-b-2 border-white rotate-45;
+}

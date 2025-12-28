@@ -12,7 +12,7 @@ interface BloodlineSelectorProps {
 
 const BloodlineSelector = (props: BloodlineSelectorProps) => {
     const { values, setFieldValue, setErrors } = useFormikContext<any>();
-    const [bloodlines, setBloodlines] = useState<{ breed: string; percentage: number }[]>([]);
+    const [bloodlines, setBloodlines] = useState<{ id: string; breedName: string; percentage: number }[]>([]);
 
     const handleAdd = async () => {
         try {
@@ -24,21 +24,32 @@ const BloodlineSelector = (props: BloodlineSelectorProps) => {
                 { abortEarly: false }
             );
 
-            if (bloodlines.some(b => b.breed === values.selectedBreed)) {
+            if (bloodlines.some(b => b.id === values.selectedBreed)) {
                 setErrors({ selectedBreed: "Эта порода уже добавлена" });
                 return;
             }
 
             const percNum = Number(values.percentage);
+            if (!Number.isInteger(percNum) || percNum < 0 || percNum > 16) {
+                setErrors({ percentage: "Кровность должна быть целым числом от 0 до 16" });
+                return;
+            }
+
             const totalPercentage = bloodlines.reduce((sum, b) => sum + b.percentage, 0);
             if (totalPercentage + percNum > 16) {
                 setErrors({ percentage: "Общая кровность не может превышать 16" });
                 return;
             }
 
-            const newBloodlines = [...bloodlines, { breed: values.selectedBreed, percentage: percNum }];
+            const selectedBreedObj = props.breeds.find(b => b.id === values.selectedBreed);
+            if (!selectedBreedObj) {
+                setErrors({ selectedBreed: "Выбранная порода не найдена" });
+                return;
+            }
+
+            const newBloodlines = [...bloodlines, { id: values.selectedBreed, breedName: selectedBreedObj.name, percentage: percNum }];
             setBloodlines(newBloodlines);
-            setFieldValue("bloodlines", newBloodlines);
+            setFieldValue("bloodlines", newBloodlines.map(b => ({ id: b.id, percentage: b.percentage })));
 
             // Сброс полей selectedBreed и percentage
             setFieldValue("selectedBreed", "");
@@ -60,13 +71,13 @@ const BloodlineSelector = (props: BloodlineSelectorProps) => {
     const handleRemove = (indexToRemove: number) => {
         const newBloodlines = bloodlines.filter((_, idx) => idx !== indexToRemove);
         setBloodlines(newBloodlines);
-        setFieldValue("bloodlines", newBloodlines);
+        setFieldValue("bloodlines", newBloodlines.map(b => ({ id: b.id, percentage: b.percentage })));
     };
 
     const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#AA336A", "#33AA99"];
 
     const totalPercentage = bloodlines.reduce((sum, b) => sum + b.percentage, 0);
-    const pieData = [{ breed: "Неизвестно", percentage: 16 - totalPercentage }, ...bloodlines];
+    const pieData = [{ breedName: "Неизвестно", percentage: 16 - totalPercentage }, ...bloodlines];
 
     return (
         <div className="flex space-x-4">
@@ -77,7 +88,7 @@ const BloodlineSelector = (props: BloodlineSelectorProps) => {
                         <Pie
                             data={pieData}
                             dataKey="percentage"
-                            nameKey="breed"
+                            nameKey="breedName"
                             outerRadius="80%"
                             fill="#8884d8"
                             label={{ fill: 'white' }}
@@ -85,7 +96,7 @@ const BloodlineSelector = (props: BloodlineSelectorProps) => {
                             {pieData.map((entry, index) => (
                                 <Cell
                                     key={`cell-${index}`}
-                                    fill={entry.breed === "Неизвестно" ? "rgba(113,113,113,0.46)" : COLORS[(index - 1) % COLORS.length]}
+                                    fill={entry.breedName === "Неизвестно" ? "rgba(113,113,113,0.46)" : COLORS[(index - 1) % COLORS.length]}
                                 />
                             ))}
                         </Pie>
@@ -108,19 +119,21 @@ const BloodlineSelector = (props: BloodlineSelectorProps) => {
                         >
                             <option value="">Выберите породу</option>
                             {props.breeds.map(b => (
-                                <option key={b.id} value={b.name}>{b.name}</option>
+                                <option key={b.id} value={b.id}>{b.name}</option>
                             ))}
                         </Field>
                         <ErrorMessage name="selectedBreed" component="div" className="error-glass text-sm" />
                     </div>
                     <div className="flex flex-col flex-1">
-                        <label className="font-semibold text-white">Кровность (дробь ?/16)</label>
+                        <label className="font-semibold text-white">Кровность (число от 0 до 16)</label>
                         <Field
                             type="number"
                             name="percentage"
                             className="input-glass w-full no-spinner"
-                            placeholder="Число от 1 до 16"
+                            placeholder="Число от 0 до 16"
                             value={values.percentage ?? ""}
+                            min={0}
+                            max={16}
                         />
                         <ErrorMessage name="percentage" component="div" className="error-glass text-sm" />
                     </div>
@@ -138,7 +151,7 @@ const BloodlineSelector = (props: BloodlineSelectorProps) => {
                                 key={index}
                                 className="list-item-glass relative flex justify-between items-center"
                             >
-                                <span>{b.breed}: {b.percentage}/16</span>
+                                <span>{b.breedName}: {b.percentage}/16</span>
                                 <button
                                     onClick={() => handleRemove(index)}
                                     className="text-white font-bold ml-4 cursor-pointer"

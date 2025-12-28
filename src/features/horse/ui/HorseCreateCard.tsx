@@ -9,6 +9,7 @@ import {useGetHorseGeneticMarkerAllQuery} from "../../../entities/horse-genetic-
 import {useGetHorseBreedAllQuery} from "../../../entities/breed/api/horseBreedApi.ts";
 import BloodlineSelector from "../../breed/BloodlineSelector/ui/BloodlineSelector.tsx";
 import BirthDateInput from "../../../shared/ui/BirthDateInput.tsx";
+import { useCreateHorseMutation } from "../../../entities/horse/api/horseApi.ts";
 
 interface IHorseCreateCardProps {
     herdId: string;
@@ -23,6 +24,7 @@ const HorseCreateCard = (props: IHorseCreateCardProps) => {
     const { data: birthplaceData, isLoading: isBirthplaceLoading, isError: isBirthplaceError } = useGetHorseBirthplaceAllQuery();
     const { data: geneticMarkerData, isLoading: isGeneticMarkerLoading, isError: isGeneticMarkerError } = useGetHorseGeneticMarkerAllQuery();
     const { data: breedData, isLoading: isBreedLoading, isError: isBreedError } = useGetHorseBreedAllQuery();
+    const [createHorse, { isLoading: isCreating }] = useCreateHorseMutation();
 
     const handleClose = () => {
         if (setModalIsOpen) {
@@ -73,36 +75,78 @@ const HorseCreateCard = (props: IHorseCreateCardProps) => {
                                 if (values.withersHeight && !/^\d+$/.test(values.withersHeight)) {
                                     errors.withersHeight = 'Допускаются только целые числа';
                                 }
+                                // Проверка дня рождения
                                 if (!values.unknownDay) {
-                                    if (values.birthDay && !/^\d+$/.test(values.birthDay)) {
-                                        errors.birthDay = 'Должно быть целым числом';
-                                    } else if (values.birthDay) {
+                                    if (
+                                        values.birthDay === '' ||
+                                        Number(values.birthDay) <= 0 ||
+                                        !/^\d+$/.test(values.birthDay)
+                                    ) {
+                                        errors.birthDay = 'Укажите корректный день или отметьте "Неизвестно"';
+                                    } else {
                                         const d = parseInt(values.birthDay, 10);
                                         if (d < 1 || d > 31) errors.birthDay = 'Некорректный день';
                                     }
                                 }
+                                // Проверка месяца рождения
                                 if (!values.unknownMonth) {
-                                    if (values.birthMonth && !/^\d+$/.test(values.birthMonth)) {
-                                        errors.birthMonth = 'Должно быть целым числом';
-                                    } else if (values.birthMonth) {
+                                    if (
+                                        values.birthMonth === '' ||
+                                        Number(values.birthMonth) <= 0 ||
+                                        !/^\d+$/.test(values.birthMonth)
+                                    ) {
+                                        errors.birthMonth = 'Укажите корректный месяц или отметьте "Неизвестно"';
+                                    } else {
                                         const m = parseInt(values.birthMonth, 10);
                                         if (m < 1 || m > 12) errors.birthMonth = 'Некорректный месяц';
                                     }
                                 }
+                                // Проверка года рождения: год должен быть положительным, не в будущем и не нулём
                                 if (!values.unknownYear) {
-                                    if (values.birthYear && !/^\d+$/.test(values.birthYear)) {
-                                        errors.birthYear = 'Должно быть целым числом';
-                                    } else if (values.birthYear) {
+                                    if (
+                                        values.birthYear === '' ||
+                                        Number(values.birthYear) <= 0 ||
+                                        !/^\d+$/.test(values.birthYear)
+                                    ) {
+                                        errors.birthYear = 'Укажите корректный год или отметьте "Неизвестно"';
+                                    } else {
                                         const y = parseInt(values.birthYear, 10);
-                                        if (y < 0) errors.birthYear = 'Некорректный год';
+                                        const currentYear = new Date().getFullYear();
+                                        if (y > currentYear) {
+                                            errors.birthYear = 'Некорректный год';
+                                        }
                                     }
                                 }
                                 return errors;
                             }}
-                            onSubmit={(values, { setSubmitting }) => {
-                                console.log(values);
-                                setSubmitting(false);
-                                handleClose();
+                            onSubmit={async (values, { setSubmitting }) => {
+                                try {
+                                    console.log(values);
+                                    await createHorse({
+                                        herd: herdId,
+                                        gender: values.gender,
+                                        name: values.name.trim() === "" ? null : values.name,
+                                        description: values.description.trim() === "" ? null : values.description.trim(),
+                                        birthDay: values.unknownDay ? null : Number(values.birthDay),
+                                        birthMonth: values.unknownMonth ? null : Number(values.birthMonth),
+                                        birthYear: values.unknownYear ? null : Number(values.birthYear),
+                                        birthPlace: values.birthplace === "" ? null : values.birthplace,
+                                        withersHeight: Number(values.withersHeight),
+                                        sire: null, // TODO
+                                        dam: null, // TODO
+                                        isPregnant: values.pregnancyStatus,
+                                        geneticMarkers: values.geneticMarker,
+                                        color: values.color,
+                                        breeds: values.bloodlines.map(bloodline => ({
+                                            ...bloodline,
+                                            percentage: (bloodline.percentage / 16) * 10000,
+                                        })),
+                                    }).unwrap();
+
+                                    handleClose();
+                                } finally {
+                                    setSubmitting(false);
+                                }
                             }}
                         >
                             {({ values, setFieldValue, isSubmitting, errors, touched }) => (
@@ -193,7 +237,7 @@ const HorseCreateCard = (props: IHorseCreateCardProps) => {
                                     </div>
 
                                     <div className="flex flex-col space-y-2 mt-4">
-                                        <button type="submit" className="btn-glass" disabled={isSubmitting}>
+                                        <button type="submit" className="btn-glass" disabled={isSubmitting || isCreating}>
                                             {isSubmitting ? 'Создание...' : 'Создать'}
                                         </button>
                                         <button type="button" className="btn-glass" onClick={handleClose}>Закрыть</button>

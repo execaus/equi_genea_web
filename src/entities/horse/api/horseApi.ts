@@ -1,25 +1,31 @@
 import {api} from "../../../app/store/api.ts";
-import type {IBreed} from "../../breed/model/breed.ts";
+import IHorse from "../model/horse.ts";
 
 export interface IHorseCreateRequest {
     herd: string;
-    gender: string;
-    name: string;
-    birthDay: number;
-    birthMonth: number;
-    birthYear: number;
-    birthPlace: string;
-    withersHeight: number;
-    sire: string;
-    dam: string;
+    gender: string | null;
+    name: string | null;
+    description: string | null;
+    birthDay: number | null;
+    birthMonth: number | null;
+    birthYear: number | null;
+    birthPlace: string | null;
+    withersHeight: number | null;
+    sire: string | null;
+    dam: string | null;
     isPregnant: boolean;
     geneticMarkers: string[];
-    colors: string[];
-    breeds: IBreed[];
+    color: string;
+    breeds: IHorseBreed[];
+}
+
+interface IHorseBreed {
+    id: string;
+    percent: number;
 }
 
 export interface IHorseCreateResponse {
-
+    horse: IHorse;
 }
 
 export const horseApi = api.injectEndpoints({

@@ -29,8 +29,8 @@ const HerdCard = (props: IHeroCardProps) => {
                 </p>
             </div>
             <div className="mt-auto text-white/60 text-sm flex flex-col items-end">
-                <p className="mb-1 flex items-center"><span className="mr-1">Создано:</span> {formatDateTime(props.card.created_at)}</p>
-                <p className="flex items-center"><span className="mr-1">Обновлено:</span> {formatDateTime(props.card.updated_at)}</p>
+                <p className="mb-1 flex items-center"><span className="mr-1">Создано:</span> {formatDateTime(props.card.createdAt)}</p>
+                <p className="flex items-center"><span className="mr-1">Обновлено:</span> {formatDateTime(props.card.updatedAt)}</p>
             </div>
         </div>
     );

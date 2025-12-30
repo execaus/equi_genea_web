@@ -3,6 +3,7 @@ import {IHorseGender} from "../../horse-gender/model/types.ts";
 import {IHorseBirthplace} from "../../horse-birthplace/model/types.ts";
 
 interface IHorse {
+    id: string;
     herd: IHerdCard;
     gender: IHorseGender | null;
     name: string | null;
@@ -13,6 +14,8 @@ interface IHorse {
     withersHeight: number | null;
     isPregnant: boolean;
     description: string | null;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export default IHorse;

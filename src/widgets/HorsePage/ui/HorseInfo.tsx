@@ -58,6 +58,33 @@ const HorseInfo = () => {
                             {data.horse.description ?? "Описание отсутствует"}
                         </p>
                     </div>
+
+                    {data.relativeHorses && data.relativeHorses.length > 0 && (
+                        <div className="glass-card text-white space-y-3 md:col-span-2">
+                            <h3 className="text-xl font-semibold mb-2">Связанные лошади</h3>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {data.relativeHorses.map(relative => (
+                                    <div
+                                        key={relative.id}
+                                        className="border border-white/10 rounded-lg p-3 hover:border-white/30 transition"
+                                    >
+                                        <p className="font-semibold">
+                                            {relative.name ?? `#${relative.id}`}
+                                        </p>
+                                        <p className="text-sm opacity-70">
+                                            Пол: {relative.gender?.name ?? "—"}
+                                        </p>
+                                        <p className="text-sm opacity-70">
+                                            Дата рождения: {[relative.birthDay, relative.birthMonth, relative.birthYear]
+                                                .filter(Boolean)
+                                                .join(".") || "—"}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

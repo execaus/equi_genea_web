@@ -1,6 +1,4 @@
 import {useState} from "react";
-import HerdList from "../../../widgets/HerdList/ui/HerdList.tsx";
-import HerdInfo from "../../../widgets/HerdPage/ui/HerdInfo.tsx";
 import {Outlet, useNavigate} from "react-router-dom";
 
 const WorkspacePage = () => {

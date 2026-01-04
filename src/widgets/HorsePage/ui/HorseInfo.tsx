@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import {useGetHorseQuery} from "../../../entities/horse/api/horseApi.ts";
+import HorseTreeCanvas from "../../../features/horse/ui/HorseTreeCanvas.tsx";
 
 const HorseInfo = () => {
     const { id: horseId } = useParams<{ id: string }>();
@@ -82,6 +83,16 @@ const HorseInfo = () => {
                                         </p>
                                     </div>
                                 ))}
+                            </div>
+
+                            <div className="md:col-span-2 h-100">
+                                <h3 className="text-xl font-semibold text-white mb-2">
+                                    Древо связей
+                                </h3>
+                                <HorseTreeCanvas
+                                    horse={data.horse}
+                                    relatives={data.relativeHorses ?? []}
+                                />
                             </div>
                         </div>
                     )}

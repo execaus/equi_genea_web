@@ -19,6 +19,7 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.9.4",
     "recharts": "^3.4.1",
+    "three": "^0.182.0",
     "yup": "^1.7.1"
   },
   "devDependencies": {

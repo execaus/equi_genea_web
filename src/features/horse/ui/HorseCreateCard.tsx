@@ -10,6 +10,8 @@ import {useGetHorseBreedAllQuery} from "../../../entities/breed/api/horseBreedAp
 import BloodlineSelector from "../../breed/BloodlineSelector/ui/BloodlineSelector.tsx";
 import BirthDateInput from "../../../shared/ui/BirthDateInput.tsx";
 import { useCreateHorseMutation } from "../../../entities/horse/api/horseApi.ts";
+import {useGetHerdHorsesQuery} from "../../../entities/herd/api/herdApi.ts";
+import IHorse from "../../../entities/horse/model/horse.ts";
 
 interface IHorseCreateCardProps {
     herdId: string;
@@ -25,6 +27,12 @@ const HorseCreateCard = (props: IHorseCreateCardProps) => {
     const { data: geneticMarkerData, isLoading: isGeneticMarkerLoading, isError: isGeneticMarkerError } = useGetHorseGeneticMarkerAllQuery();
     const { data: breedData, isLoading: isBreedLoading, isError: isBreedError } = useGetHorseBreedAllQuery();
     const [createHorse, { isLoading: isCreating }] = useCreateHorseMutation();
+    const { data: horsesData, error: horsesError, isFetching: horsesIsFetching } = useGetHerdHorsesQuery({
+        id: herdId,
+        page: 1,
+        limit: 32,
+        search: "",
+    });
 
     const handleClose = () => {
         if (setModalIsOpen) {
@@ -36,9 +44,9 @@ const HorseCreateCard = (props: IHorseCreateCardProps) => {
         <div className="flex flex-col space-y-2 mt-4">
             <h2 className="text-2xl font-bold text-white mb-4 text-left">Создание лошади</h2>
             {
-                (isGenderError || isColorError || isBirthplaceError || isGeneticMarkerError || isBreedError)
+                (isGenderError || isColorError || isBirthplaceError || isGeneticMarkerError || isBreedError || horsesError)
                     ? <p>Ошибка загрузки данных</p>
-                    : (isGenderLoading || isColorLoading || isBirthplaceLoading || isGeneticMarkerLoading || isBreedLoading)
+                    : (isGenderLoading || isColorLoading || isBirthplaceLoading || isGeneticMarkerLoading || isBreedLoading || horsesIsFetching)
                         ? <p>Загрузка данных...</p>
                         : <Formik
                             initialValues={{
@@ -51,6 +59,8 @@ const HorseCreateCard = (props: IHorseCreateCardProps) => {
                                 bloodlines: [],
                                 pregnancyStatus: false,
                                 withersHeight: '',
+                                sire: '',
+                                dam: '',
                                 birthDay: '',
                                 birthMonth: '',
                                 birthYear: '',
@@ -132,8 +142,8 @@ const HorseCreateCard = (props: IHorseCreateCardProps) => {
                                         birthYear: values.unknownYear ? null : Number(values.birthYear),
                                         birthPlace: values.birthplace === "" ? null : values.birthplace,
                                         withersHeight: Number(values.withersHeight),
-                                        sire: null, // TODO
-                                        dam: null, // TODO
+                                        sire: values.sire === '' ? null : values.sire,
+                                        dam: values.dam === '' ? null : values.dam,
                                         isPregnant: values.pregnancyStatus,
                                         geneticMarkers: values.geneticMarker,
                                         color: values.color,
@@ -157,6 +167,40 @@ const HorseCreateCard = (props: IHorseCreateCardProps) => {
 
                                     <label htmlFor="description" className="font-semibold text-lg mb-1 text-white block">Описание</label>
                                     <Field name="description" as="textarea" className="input-glass mb-2 w-full" />
+
+                                    <div className="flex flex-row space-x-6">
+                                        <div className="flex flex-col w-1/3">
+                                            <label htmlFor="sire" className="font-semibold text-lg mb-1 text-white block">Отец</label>
+                                            <Field
+                                                name="sire"
+                                                as="select"
+                                                className="input-glass mb-2 w-full"
+                                            >
+                                                <option value="">Неизвестно</option>
+                                                {horsesData?.horses?.map((horse: IHorse) => (
+                                                    <option key={horse.id} value={horse.id}>
+                                                        {horse.name || `#${horse.id}`}
+                                                    </option>
+                                                ))}
+                                            </Field>
+                                        </div>
+
+                                        <div className="flex flex-col w-1/3">
+                                            <label htmlFor="dam" className="font-semibold text-lg mb-1 text-white block">Мать</label>
+                                            <Field
+                                                name="dam"
+                                                as="select"
+                                                className="input-glass mb-2 w-full"
+                                            >
+                                                <option value="">Неизвестно</option>
+                                                {horsesData?.horses?.map((horse: IHorse) => (
+                                                    <option key={horse.id} value={horse.id}>
+                                                        {horse.name || `#${horse.id}`}
+                                                    </option>
+                                                ))}
+                                            </Field>
+                                        </div>
+                                    </div>
 
                                     <div className="flex flex-row space-x-6">
                                         <div className="flex flex-col space-x-4">

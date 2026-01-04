@@ -28,6 +28,11 @@ export interface IHorseCreateResponse {
     horse: IHorse;
 }
 
+export interface IGetHorseResponse {
+    horse: IHorse;
+    relativeHorses: IHorse[];
+}
+
 export const horseApi = api.injectEndpoints({
     endpoints: (builder) => ({
         createHorse: builder.mutation<IHorseCreateResponse, IHorseCreateRequest>({
@@ -37,8 +42,14 @@ export const horseApi = api.injectEndpoints({
                 body: credentials,
             }),
         }),
+        getHorse: builder.query<IGetHorseResponse, string>({
+            query: (id) => ({
+                url: `horse/${id}`,
+                method: 'GET',
+            }),
+        }),
     }),
     overrideExisting: false,
 });
 
-export const { useCreateHorseMutation } = horseApi;
+export const { useCreateHorseMutation, useGetHorseQuery } = horseApi;

@@ -3,7 +3,7 @@ import type { RootState } from './store.ts';
 import {logout} from "../../entities/account/model/accountSlice.ts";
 
 const baseQuery = fetchBaseQuery({
-    baseUrl: 'http://localhost:8080/api',
+    baseUrl: `${import.meta.env.VITE_API_URL}/api`,
     prepareHeaders: (headers, { getState }) => {
         const token = (getState() as RootState).account.token;
         if (token) {

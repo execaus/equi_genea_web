@@ -5,6 +5,8 @@ import {IHorseBirthplace} from "../../horse-birthplace/model/types.ts";
 interface IHorse {
     id: string;
     herd: IHerdCard;
+    sire: IHorse;
+    dam: IHorse;
     gender: IHorseGender | null;
     name: string | null;
     birthDay: number | null;
